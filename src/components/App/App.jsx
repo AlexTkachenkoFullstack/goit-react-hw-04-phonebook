@@ -1,76 +1,70 @@
 
-import React, { Component } from 'react';
+import React from 'react';
+import { useState,useEffect } from 'react';
 import ContactForm from 'components/ContactForm/ContactForm';
 import ContactList from 'components/ContactList/ContactList';
 import Filter from 'components/Filter';
 import { nanoid } from 'nanoid'
 import { AppContainer, ApiTitleH1, ApiTitleH2 } from './App.styled';
-const KEY='contacts'
-class App extends Component {
-  state = {
-  contacts: [{id: 'id-1', name: 'Rosie Simpson', number: '459-12-56'},
-    {id: 'id-2', name: 'Hermione Kline', number: '443-89-12'},
-    {id: 'id-3', name: 'Eden Clements', number: '645-17-79'},
-    {id: 'id-4', name: 'Annie Copeland', number: '227-91-26'}],
-    filter: ''
-  }
-  
-  componentDidMount() {
-    const contacts = JSON.parse(localStorage.getItem(KEY));
-    if (contacts) {
-     this.setState({contacts})
-    }
-  }
+const KEY = 'contacts'
 
-  componentDidUpdate(_, prevState) {
-    if (prevState.contacts !== this.state.contacts) {
-      localStorage.setItem(KEY, JSON.stringify(this.state.contacts))
-    }
+function App() {
+  // lazy state initialization (localStorage.getItem just for first render)
+  const [contacts, setContacts] = useState(() => { return JSON.parse(window.localStorage.getItem(KEY)) ?? [] });
+  const [filter, setFilter] = useState('')
+  
+  useEffect(() => {
+window.localStorage.setItem(KEY, JSON.stringify(contacts))
+  }, [contacts])
+  
+ 
+  function handleCnangeFilter(event){
+    setFilter(event.target.value)
 }
 
-  handleCnangeFilter = (event) => {
-    this.setState({ filter: event.target.value })
+  function deleteContact(idContact) {
+    setContacts(prevState=>prevState.filter(({id})=>idContact!==id))
   }
 
- deleteContact = (idContact) => {
-    this.setState((prevState)=>({ contacts: prevState.contacts.filter(({id})=>id!==idContact)}))
+  function findContacts() {
+    return contacts.filter(({name})=>name.toUpperCase().includes(filter.toUpperCase()))
   }
 
-  findContacts = () => {
-     const  сontactMatches= this.state.contacts.filter(({name})=>(name.toUpperCase().includes(this.state.filter.toUpperCase())))
-   return сontactMatches
-  }
-
-  handleSubmit = (values, actions) =>
-  {
-        const contactId = nanoid()
-          if (this.state.contacts.some(item => item.name === values.name))
-            {
+  function handleSubmit(values, actions) {
+    const contactId = nanoid()
+    if(contacts.some(({name})=>name===values.name)){
             alert(`${values.name} is already in contacts`)
             return
-            }  
-      this.setState((prevState) =>
-      (
-        {
-          contacts: [...prevState.contacts,
-          { name: values.name, number: values.number.toString(), id: contactId }]
-        }
-      )
-                  )
-        actions.resetForm()
+    } 
+    setContacts((prevState)=>[...prevState, { id: contactId, name: values.name, number: values.number.toString()}])
+    actions.resetForm()
   }
-
-  render() {
-    return (
+  
+  return (
       <AppContainer>
          <ApiTitleH1>Phonebook</ApiTitleH1>
-        <ContactForm onSubmit={this.handleSubmit} contacts={ this.state.contacts} />
+        <ContactForm onSubmit={handleSubmit} />
          <ApiTitleH2>Contacts</ApiTitleH2>
-         <Filter  onChangeFilter={this.handleCnangeFilter}  />
-        <ContactList contacts={this.state.contacts} filter={this.findContacts} onDeleteContact={this.deleteContact} />
+         <Filter  onChangeFilter={handleCnangeFilter}  />
+        <ContactList  filter={findContacts} onDeleteContact={deleteContact} />
       </AppContainer>
     )
-  }
 }
+
+// class App extends Component {
+//  
+  
+// 
+
+//   componentDidUpdate(_, prevState) {
+//     if (prevState.contacts !== this.state.contacts) {
+//       localStorage.setItem(KEY, JSON.stringify(this.state.contacts))
+//     }
+// }
+
+
+
+
+
 
 export default App

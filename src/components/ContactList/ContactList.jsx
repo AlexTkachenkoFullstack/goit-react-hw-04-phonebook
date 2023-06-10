@@ -1,15 +1,13 @@
-import React, { Component } from "react";
+import React from "react";
 import PropTypes from 'prop-types';
 import { IoPersonCircleSharp   } from "react-icons/io5";
 import { ContactListContainer, ContactListItem, ContactListItemInfo, ContactListItemText, ButtonDeliteContact } from "./ContactList.styled";
-class ContactList extends Component{
-  
- 
 
-    render() {
-        return (
+
+function ContactList({filter, onDeleteContact}) {
+     return (
             <ContactListContainer >
-                {this.props.filter().map(({ id, name, number })=>{
+                {filter().map(({ id, name, number })=>{
                     return (
                         <ContactListItem key={id}>
                             <IoPersonCircleSharp />
@@ -17,19 +15,17 @@ class ContactList extends Component{
                                 <ContactListItemText>{name}: {number}</ContactListItemText>
                                 <ButtonDeliteContact
                                     type="button"
-                                    onClick={() => { this.props.onDeleteContact(id) }}>
+                                    onClick={() => {onDeleteContact(id) }}>
                                     Delete
                                 </ButtonDeliteContact> 
-                            </ContactListItemInfo>
-                                
+                            </ContactListItemInfo>   
                         </ContactListItem>
-                        
                     )
                 })}
             </ContactListContainer>
         )
-    }
 }
+
 
 export default ContactList
 
